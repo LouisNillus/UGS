@@ -111,5 +111,18 @@ public class Cell
             return null;
         }
     }
+    
+    public GameObject BackgroundGO()
+    {
+        try
+        {
+            return (GameObject)background;
+        }
+        catch
+        {
+            Debug.LogError("Can't cast background as GameObject");
+            return null;
+        }
+    }
     #endregion
 }

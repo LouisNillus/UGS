@@ -49,7 +49,23 @@ public class UGS_Grid : MonoBehaviour
             FindModuleOfType<UGS_M_Maps>().WeightMap();
 
         if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0) hoveredCell = GetCellFromMousePos();
+
+        if(allowLock && hoveredCell != null)
+        {
+            if (lockX && lockY) hoveredCell = GetCellAtPosition(lockXIndex, lockYIndex);
+            else if (lockX) hoveredCell = GetCellAtPosition(lockXIndex, hoveredCell.gridPosition.y);
+            else if (lockY) hoveredCell = GetCellAtPosition(hoveredCell.gridPosition.x, lockYIndex);
+        }
     }
+
+    public bool allowLock;
+
+    public bool lockX;
+    public bool lockY;
+
+    public int lockXIndex;
+    public int lockYIndex;
+
 
 
     public void InitializeGrid()
@@ -137,9 +153,12 @@ public class UGS_Grid : MonoBehaviour
 
         foreach (Cell cell in cells)
         {
-            if (Methods.InBoundsXY(cell.position, mouseTracker.MousePos2D(), cellsDimensions.x / 2, cellsDimensions.y / 2)) return cell;
+            if (Methods.InBoundsXY(cell.position, mouseTracker.MousePos2D(), cellsDimensions.x / 2, cellsDimensions.y / 2))
+            {
+                result = cell;
+                break;
+            }
         }
-
         return result;
     }
 
@@ -244,15 +263,67 @@ public class UGS_Grid : MonoBehaviour
 
     #endregion
 
+    #region Rows & Columns
+
+    public Cell[] GetRowAtIndex(int index)
+    {
+        Cell[] result = new Cell[dimensions.x];
+
+        for (int i = 0; i < dimensions.x; i++)
+        {
+            result[i] = GetCellAtPosition(i, index);
+        }
+
+        return result;
+    }
+
+    public Cell[] GetColumnAtIndex(int index)
+    {
+        Cell[] result = new Cell[dimensions.y];
+
+        for (int i = 0; i < dimensions.y; i++)
+        {
+            result[i] = GetCellAtPosition(index, i);
+        }
+
+        return result;
+    }
+
+    #endregion
+
     #region Swaps
 
     public void SwapCells(Cell a, Cell b, bool includeBackground = false)
     {
-        object itemA = a.Item<object>();
+
+
+        Vector3 positionA = a.position;
+        Vector2Int gridPositionA = a.gridPosition;
+
+        Vector3 positionB = b.position;
+        Vector2Int gridPositionB = b.gridPosition;
+
+
+        cells[gridPositionA.x, gridPositionA.y] = b;
+        cells[gridPositionB.x, gridPositionB.y] = a;
+
+        SwapPos(a.ItemGO(), b.ItemGO());
+
+        if(includeBackground)
+        SwapPos(a.BackgroundGO(), b.BackgroundGO());
+
+        a.position = positionB;
+        a.gridPosition = gridPositionB;
+
+        b.position = positionA;
+        b.gridPosition = gridPositionA;
+
+        /*object itemA = a.Item<object>();
         object itemB = b.Item<object>();
 
         a.SetItem(itemB);
         b.SetItem(itemA);
+
 
         if(includeBackground)
         {
@@ -261,9 +332,21 @@ public class UGS_Grid : MonoBehaviour
 
             a.SetBackground(backgroundB);
             b.SetBackground(backgroundA);
-        }
-
+        }*/
     }
+
+    public void SwapPos(GameObject a, GameObject b)
+    {
+        if (a != null && b != null)
+        {
+            Vector3 posA = a.transform.position;
+            Vector3 posB = b.transform.position;
+
+            a.transform.position = posB;
+            b.transform.position = posA;
+        }
+    }
+
     #endregion
 
     #region Modules
