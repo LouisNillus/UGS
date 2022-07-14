@@ -8,9 +8,9 @@ public class UGS_M_Keyboard : UGS_Module
     [Header("Key Down")]
     public List<UGS_Input> inputsKD = new List<UGS_Input>();
     [Header("Key")]
+    public List<UGS_Input> inputsK = new List<UGS_Input>();
     public bool onMouseMoveOnly;
     public Vector2 mouseMovementThreshold;
-    public List<UGS_Input> inputsK = new List<UGS_Input>();
     [Header("Key Up")]
     public List<UGS_Input> inputsKU = new List<UGS_Input>();
 
@@ -83,17 +83,30 @@ public class UGS_M_Keyboard : UGS_Module
     }
 
     public void Log() => Debug.Log("yeeees!");
+
+    [Button("BindKey")]
+    public bool readInput;
+    public void BindKey()
+    {
+
+    }
 }
 
 [System.Serializable]
 public class UGS_Input
 {
+
     public KeyCode key;
     public bool reverse;
+
+    [ColorField(0,1,0,1,0,0, true)]
+    public bool disabled;
+
     public List<UGS_Action> actions = new List<UGS_Action>();
 
     public void PlayActions(UGS_Grid grid)
     {
+        if(!disabled)
         foreach(UGS_Action action in actions)
         {
             action.Play(grid);
@@ -102,11 +115,13 @@ public class UGS_Input
 
     public void PlayActionsReverse(UGS_Grid grid)
     {
+        if (!disabled)
         for (int i = actions.Count - 1; i >= 0; i--)
         {
             actions[i].Play(grid);
         }
     }
+
 }
 
 

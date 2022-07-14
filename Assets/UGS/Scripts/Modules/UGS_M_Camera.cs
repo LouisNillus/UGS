@@ -11,6 +11,9 @@ public class UGS_M_Camera : UGS_Module
 
     Camera cam;
     float camZ;
+
+    public Coroutine shakeRoutine;
+
     private void Start()
     {
         cam = Camera.main;
@@ -58,6 +61,26 @@ public class UGS_M_Camera : UGS_Module
     public void ClampCameraFOV()
     {
         Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, minFOV, maxFOV);
+    }
+
+    public IEnumerator Shake(float duration, float magnitude)
+    {
+        Vector3 initPos = Camera.main.transform.localPosition;
+
+        float t = 0f;
+
+        while (t < duration)
+        {
+            float xShake = Random.Range(-1f, 1f) * magnitude;
+            float yShake = Random.Range(-1f, 1f) * magnitude;
+
+            Camera.main.transform.localPosition = initPos + new Vector3(xShake, yShake, 0);
+            yield return null;
+
+            t += Time.deltaTime;
+        }
+
+        Camera.main.transform.localPosition = initPos;
     }
 }
 

@@ -9,6 +9,8 @@ public class Cell
     object item;
     object background;
 
+    public Object go;
+
     [HideInInspector] public UnityEvent OnSelectCell;
     [HideInInspector] public UnityEvent OnReleaseCell;
 
@@ -29,7 +31,10 @@ public class Cell
         occupied = false;
         item = null;
 
-        if(includeBackground) background = null;
+        if (includeBackground)
+        {
+            background = null;
+        }
     }
 
     #region Set Item / Background
@@ -46,6 +51,7 @@ public class Cell
         if(_item == null) return;
 
         item = _item;
+        go = _item as Object;
         occupied = true;
     }
 

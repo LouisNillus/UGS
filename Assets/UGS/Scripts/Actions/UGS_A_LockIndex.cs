@@ -12,16 +12,18 @@ public class UGS_A_LockIndex : UGS_Action
     {
         if(lockAtMousePos)
         {
-            grid.lockX = lockType == LockType.X;
-            grid.lockY = lockType == LockType.Y;
+            grid.lockX = (lockType == LockType.X || lockType == LockType.XY);
+            grid.lockY = (lockType == LockType.Y || lockType == LockType.XY);
 
             if(grid.hoveredCell != null)
             {
+                if((lockType == LockType.X || lockType == LockType.XY))
                 grid.lockXIndex = grid.hoveredCell.gridPosition.x;
+                if((lockType == LockType.Y || lockType == LockType.XY))
                 grid.lockYIndex = grid.hoveredCell.gridPosition.y;
             }
         }
     }
 }
 
-public enum LockType {X, Y}
+public enum LockType {Unlocked, X, Y, XY}

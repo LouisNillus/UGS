@@ -17,6 +17,10 @@ public class UGS_Grid : MonoBehaviour
 
     public Object template;
 
+    [HideInInspector] public bool lockX;
+    [HideInInspector] public bool lockY;
+    [HideInInspector] public int lockXIndex;
+    [HideInInspector] public int lockYIndex;
 
     public List<UGS_Module> modules = new List<UGS_Module>();
 
@@ -31,7 +35,7 @@ public class UGS_Grid : MonoBehaviour
     public GridFocusPoint initialFocusPoint = GridFocusPoint.Middle;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         InitializeGrid();
         InitializeModules();
@@ -50,23 +54,13 @@ public class UGS_Grid : MonoBehaviour
 
         if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0) hoveredCell = GetCellFromMousePos();
 
-        if(allowLock && hoveredCell != null)
+        if(hoveredCell != null)
         {
             if (lockX && lockY) hoveredCell = GetCellAtPosition(lockXIndex, lockYIndex);
             else if (lockX) hoveredCell = GetCellAtPosition(lockXIndex, hoveredCell.gridPosition.y);
             else if (lockY) hoveredCell = GetCellAtPosition(hoveredCell.gridPosition.x, lockYIndex);
         }
     }
-
-    public bool allowLock;
-
-    public bool lockX;
-    public bool lockY;
-
-    public int lockXIndex;
-    public int lockYIndex;
-
-
 
     public void InitializeGrid()
     {
@@ -86,9 +80,11 @@ public class UGS_Grid : MonoBehaviour
 
                 if (go is GameObject) (go as GameObject).transform.parent = cellsContainer;
 
-                c.SetItem(Random.value > 0.9f ? new GameObject() : null);
+                c.SetItem(go);
+                //c.SetBackground(go);
 
-                c.SetBackground(go);
+                //c.SetItem(Random.value > 0.9f ? new GameObject() : null);
+
 
                 c.Initialize();
             }
@@ -162,6 +158,40 @@ public class UGS_Grid : MonoBehaviour
         return result;
     }
 
+    public List<Cell> GetEmptyCells()
+    {
+        List<Cell> result = new List<Cell>();
+
+        foreach (Cell c in cells)
+        {
+            if (c.occupied == false) result.Add(c);
+        }
+
+        return result;
+    }
+
+    public List<Cell> GetOccupiedCells()
+    {
+        List<Cell> result = new List<Cell>();
+
+        foreach (Cell c in cells)
+        {
+            if (c.occupied) result.Add(c);
+        }
+
+        return result;
+    }
+
+    public Cell GetRandomEmptyCell()
+    {
+        List<Cell> emptyCells = GetEmptyCells();
+
+        int i = Random.Range(0, emptyCells.Count);
+
+        if(i > emptyCells.Count - 1) return null;
+
+        return emptyCells[i];
+    }
 
     #region Focus
     public void FocusCamera(Vector3 point, Camera cam = null)
@@ -208,7 +238,7 @@ public class UGS_Grid : MonoBehaviour
 
     #region Adjacents
 
-    public Cell[] GetAdjacentCells(Cell origin, int depth = 1, bool includeSelf = false)
+    public Cell[] GetAdjacentCells(Cell origin, Direction direction = Direction.All, int depth = 1, bool includeSelf = false)
     {
 
         List<Cell> result = new List<Cell>();
@@ -221,10 +251,10 @@ public class UGS_Grid : MonoBehaviour
             int up = origin.gridPosition.y + i;
 
 
-            if (left >= 0 && left < dimensions.x) result.Add<Cell>(cells[left, origin.gridPosition.y]);
-            if (right >= 0 && right < dimensions.x) result.Add<Cell>(cells[right, origin.gridPosition.y]);
-            if (down >= 0 && down < dimensions.y) result.Add<Cell>(cells[origin.gridPosition.x, down]);
-            if (up >= 0 && up < dimensions.y) result.Add<Cell>(cells[origin.gridPosition.x, up]);
+            if (left >= 0 && left < dimensions.x && (direction == Direction.All || direction == Direction.Left)) result.Add<Cell>(cells[left, origin.gridPosition.y]);
+            if (right >= 0 && right < dimensions.x && (direction == Direction.All || direction == Direction.Right)) result.Add<Cell>(cells[right, origin.gridPosition.y]);
+            if (down >= 0 && down < dimensions.y && (direction == Direction.All || direction == Direction.Down)) result.Add<Cell>(cells[origin.gridPosition.x, down]);
+            if (up >= 0 && up < dimensions.y && (direction == Direction.All || direction == Direction.Up)) result.Add<Cell>(cells[origin.gridPosition.x, up]);
 
             if (includeSelf) result.Add(origin);
         }
@@ -295,8 +325,6 @@ public class UGS_Grid : MonoBehaviour
 
     public void SwapCells(Cell a, Cell b, bool includeBackground = false)
     {
-
-
         Vector3 positionA = a.position;
         Vector2Int gridPositionA = a.gridPosition;
 
@@ -317,22 +345,55 @@ public class UGS_Grid : MonoBehaviour
 
         b.position = positionA;
         b.gridPosition = gridPositionA;
+    }
 
-        /*object itemA = a.Item<object>();
-        object itemB = b.Item<object>();
+    public void SwapCells(Cell a, Direction direction, bool includeBackground = false)
+    {
+        Cell b = null;
 
-        a.SetItem(itemB);
-        b.SetItem(itemA);
-
-
-        if(includeBackground)
+        switch (direction)
         {
-            object backgroundA = a.Background<object>();
-            object backgroundB = b.Background<object>();
+            case Direction.Up:
+                if(a.gridPosition.y + 1 < dimensions.y)
+                b = cells[a.gridPosition.x, a.gridPosition.y + 1];
+                break;
+            case Direction.Down:
+                if(a.gridPosition.y - 1 >= 0)
+                b = cells[a.gridPosition.x, a.gridPosition.y - 1];
+                break;
+            case Direction.Left:
+                if(a.gridPosition.x - 1 >= 0)
+                b = cells[a.gridPosition.x - 1, a.gridPosition.y];
+                break;
+            case Direction.Right:
+                if(a.gridPosition.x + 1 < dimensions.x)
+                b = cells[a.gridPosition.x + 1, a.gridPosition.y];
+                break;
+        }
 
-            a.SetBackground(backgroundB);
-            b.SetBackground(backgroundA);
-        }*/
+        if (b == null) return;
+
+        Vector3 positionA = a.position;
+        Vector2Int gridPositionA = a.gridPosition;
+
+        Vector3 positionB = b.position;
+        Vector2Int gridPositionB = b.gridPosition;
+
+
+        cells[gridPositionA.x, gridPositionA.y] = b;
+        cells[gridPositionB.x, gridPositionB.y] = a;
+
+        if(a.ItemGO() != null) a.ItemGO().transform.position = b.position;
+        if(b.ItemGO() != null) b.ItemGO().transform.position = a.position;
+
+        if (includeBackground)
+            SwapPos(a.BackgroundGO(), b.BackgroundGO());
+
+        a.position = positionB;
+        a.gridPosition = gridPositionB;
+
+        b.position = positionA;
+        b.gridPosition = gridPositionA;
     }
 
     public void SwapPos(GameObject a, GameObject b)
@@ -374,6 +435,14 @@ public class UGS_Grid : MonoBehaviour
     }
 
     #endregion
+
+    public void SetAllBackgrounds(object background)
+    {
+        foreach(Cell c in cells)
+        {
+            c.SetBackground(background);
+        }
+    }
 }
 
 public enum GridFocusPoint

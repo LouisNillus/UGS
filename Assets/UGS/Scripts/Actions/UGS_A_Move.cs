@@ -15,4 +15,4 @@ public class UGS_A_Move : UGS_Action
         grid.selectedCell = grid.GetCellFromDirection(grid.selectedCell, direction);
     }
 }
-public enum Direction { Up, Down, Left, Right }
+public enum Direction { Up, Down, Left, Right, All }

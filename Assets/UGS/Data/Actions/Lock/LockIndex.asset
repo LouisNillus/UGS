@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: LockIndex
   m_EditorClassIdentifier: 
   lockAtMousePos: 1
-  lockType: 1
+  lockType: 2

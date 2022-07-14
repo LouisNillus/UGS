@@ -11,7 +11,7 @@ public class UGS_M_Maps : UGS_Module
 
     private void Start()
     {
-        FillMap();
+        //FillMap();
     }
 
     public void WeightMap()
