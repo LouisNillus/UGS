@@ -66,6 +66,7 @@ public class InputModuleWindow : EditorWindow
 
         currentTab = GUILayout.Toolbar(currentTab, new string[] { "Key Down", "Key", "Key Up", "Scroll Up", "Scroll Down" });
 
+
         switch(currentTab)
         {
             case 0:
@@ -86,6 +87,7 @@ public class InputModuleWindow : EditorWindow
                 EditorGUILayout.PropertyField(actionsSD);
                 break;
         }
+
 
         EditorGUILayout.EndScrollView();
 

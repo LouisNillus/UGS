@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEditor;
 
 public class UGS_Grid : MonoBehaviour
@@ -40,7 +41,6 @@ public class UGS_Grid : MonoBehaviour
         InitializeGrid();
         InitializeModules();
 
-
         selectedCell = GetCellAtPosition(0, 0);
 
         Camera.main.transform.position = GetFocusPoint(initialFocusPoint).ChangeZ(Camera.main.transform.position.z);
@@ -54,7 +54,7 @@ public class UGS_Grid : MonoBehaviour
 
         if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0) hoveredCell = GetCellFromMousePos();
 
-        if(hoveredCell != null)
+        if (hoveredCell != null)
         {
             if (lockX && lockY) hoveredCell = GetCellAtPosition(lockXIndex, lockYIndex);
             else if (lockX) hoveredCell = GetCellAtPosition(lockXIndex, hoveredCell.gridPosition.y);
@@ -71,9 +71,9 @@ public class UGS_Grid : MonoBehaviour
             for (int y = 0; y < dimensions.y; y++)
             {
                 Cell c = new Cell();
-                cells[x,y] = c;
+                cells[x, y] = c;
 
-                c.gridPosition = new Vector2Int(x,y);
+                c.gridPosition = new Vector2Int(x, y);
                 c.position = origin.position + new Vector3(x * cellsStep, y * cellsStep);
 
                 Object go = Instantiate(template, c.position, Quaternion.identity);

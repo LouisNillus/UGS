@@ -647,46 +647,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grid: {fileID: 0}
   inputsKD:
-  - key: 97
-    reverse: 0
-    disabled: 0
-    actions:
-    - {fileID: 11400000, guid: eec057cf66cc55b41af799edf2ba0f93, type: 2}
   - key: 101
     reverse: 0
-    disabled: 0
+    enabled: 1
     actions:
     - {fileID: 11400000, guid: 85b364ffd0189a942a5d746584ea98ea, type: 2}
+    checker:
+      idName: 
+      observers:
+      - outputs:
+        - {fileID: 0}
+        conditions:
+        - lineIndex: 0
+          typeIndex: 0
+          color: {r: 1, g: 1, b: 1, a: 1}
+          target: {fileID: 0}
+          componentIndex: 0
+          methodIndex: 0
+          methodName: 
+          fieldIndex: 0
+          operatorIndex: 0
+      output: []
+  - key: 97
+    reverse: 0
+    enabled: 1
+    actions:
+    - {fileID: 11400000, guid: eec057cf66cc55b41af799edf2ba0f93, type: 2}
+    checker:
+      idName: Repaint Red
+      observers: []
+      output: []
   - key: 111
     reverse: 0
-    disabled: 0
+    enabled: 1
     actions:
     - {fileID: 11400000, guid: 6c21af5210017a44687fe2fc1e62ea2e, type: 2}
+    checker:
+      idName: 
+      observers: []
+      output: []
   inputsK:
   - key: 323
     reverse: 0
-    disabled: 0
+    enabled: 1
     actions:
     - {fileID: 11400000, guid: 16a9cc3c7b4e9d14f86decdd462ca283, type: 2}
     - {fileID: 11400000, guid: 02f74f388cd55204698d697586591769, type: 2}
+    checker:
+      idName: 
+      observers: []
+      output: []
   - key: 304
     reverse: 0
-    disabled: 0
+    enabled: 1
     actions:
     - {fileID: 11400000, guid: 8d23057ab8d40a446b345fef722cc9cd, type: 2}
+    checker:
+      idName: 
+      observers: []
+      output: []
   - key: 323
     reverse: 0
-    disabled: 0
+    enabled: 1
     actions:
     - {fileID: 11400000, guid: 02f74f388cd55204698d697586591769, type: 2}
+    checker:
+      idName: 
+      observers: []
+      output: []
   onMouseMoveOnly: 1
   mouseMovementThreshold: {x: 0.01, y: 0.01}
   inputsKU:
   - key: 304
     reverse: 0
-    disabled: 0
+    enabled: 1
     actions:
     - {fileID: 11400000, guid: 45ab5d980c5435b4bb69ae5b8c1092f6, type: 2}
+    checker:
+      idName: 
+      observers: []
+      output: []
   actionsSU:
   - {fileID: 11400000, guid: d2b85f636a7b9864fbb85badfa8ff2cd, type: 2}
   actionsSD:

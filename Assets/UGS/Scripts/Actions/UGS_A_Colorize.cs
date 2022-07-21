@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class UGS_A_Colorize : UGS_Action
 {
@@ -11,6 +12,7 @@ public class UGS_A_Colorize : UGS_Action
 
     public CellType cellType;
 
+    public object checker;
 
     public override void Play(UGS_Grid grid)
     {

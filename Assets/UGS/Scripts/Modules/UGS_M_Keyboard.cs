@@ -86,6 +86,8 @@ public class UGS_M_Keyboard : UGS_Module
 
     [Button("BindKey")]
     public bool readInput;
+
+
     public void BindKey()
     {
 
@@ -99,14 +101,15 @@ public class UGS_Input
     public KeyCode key;
     public bool reverse;
 
-    [ColorField(0,1,0,1,0,0, true)]
-    public bool disabled;
+    [ColorField(0,1,0,1,0,0, false)]
+    public bool enabled = true;
 
     public List<UGS_Action> actions = new List<UGS_Action>();
 
+    public UGS_Checker checker;
     public void PlayActions(UGS_Grid grid)
     {
-        if(!disabled)
+        if(enabled)
         foreach(UGS_Action action in actions)
         {
             action.Play(grid);
@@ -115,7 +118,7 @@ public class UGS_Input
 
     public void PlayActionsReverse(UGS_Grid grid)
     {
-        if (!disabled)
+        if (enabled)
         for (int i = actions.Count - 1; i >= 0; i--)
         {
             actions[i].Play(grid);

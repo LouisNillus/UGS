@@ -14,6 +14,9 @@ public class ButtonDrawer : PropertyDrawer
         Object target = property.serializedObject.targetObject;
         System.Type type = target.GetType();
         System.Reflection.MethodInfo method = type.GetMethod(methodName);
+
+
+        Debug.Log("Pass");
         if (method == null)
         {
             GUI.Label(position, "Method could not be found. Is it public?");
@@ -26,17 +29,9 @@ public class ButtonDrawer : PropertyDrawer
         }
         if (GUI.Button(position, method.Name))
         {
+            Debug.Log("Button shown");
             method.Invoke(target, null);
         }
     }
 }
 #endif
-
-public class ButtonAttribute : PropertyAttribute
-{
-    public string MethodName { get; }
-    public ButtonAttribute(string methodName)
-    {
-        MethodName = methodName;
-    }
-}
