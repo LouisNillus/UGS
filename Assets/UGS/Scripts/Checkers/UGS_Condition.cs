@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 [System.Serializable]
 public class UGS_Condition
@@ -17,6 +16,7 @@ public class UGS_Condition
     public int fieldIndex;
 
     public UGS_Atom atom;
+    public Object comparedObject  = null;
 
     public int operatorIndex;
 

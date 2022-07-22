@@ -12,9 +12,10 @@ public class UGS_Observer
 
     public List<UGS_Condition> conditions = new List<UGS_Condition>();
 
+    public int actionIndex;
     public UGS_Observer()
     {
-
+        actionIndex = 0;
     }
 
     public void Start()

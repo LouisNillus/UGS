@@ -26,7 +26,7 @@ public class ObserverDrawer : PropertyDrawer
 
 
         observer.Start();
-        
+
         //float propertyHeight = GetPropertyHeight(property, label);
 
         SerializedProperty outputs = property.FindPropertyRelative("outputs");
@@ -36,11 +36,27 @@ public class ObserverDrawer : PropertyDrawer
 
         if (outputsCount <= 0) outputs.InsertArrayElementAtIndex(0);
 
+        GUI.backgroundColor = (ObserverAction)observer.actionIndex == ObserverAction.Add ? Color.green
+                            : (ObserverAction)observer.actionIndex == ObserverAction.Reset ? Color.red : Color.white;
 
+        observer.actionIndex = EditorGUI.Popup(position.RatioPositionX(0, 4).ClampHeight(20), observer.actionIndex, System.Enum.GetNames(typeof(ObserverAction)));
 
-        if (GUI.Button(position.RatioPositionX(0, 2).ClampHeight(20), "+"))
+        GUI.backgroundColor = Color.white;
+
+        GUIContent buttonSkin = new GUIContent(Resources.Load("RightArrow") as Texture2D);
+
+        if (GUI.Button(position.RatioPositionX(4.25f, 1.25f).ClampHeight(20), buttonSkin))
         {
-            observer.conditions.Add(new UGS_Condition(observer.conditions.Count, Color.white));
+            switch ((ObserverAction)observer.actionIndex)
+            {
+                case ObserverAction.Add:
+                    observer.conditions.Add(new UGS_Condition(observer.conditions.Count, Color.white));
+                    break;
+                case ObserverAction.Reset:
+                    observer.conditions.Clear();
+                    observer.outputs.Clear();
+                    break;
+            }
         }
 
         Color defaultColor = Color.white;
@@ -53,7 +69,7 @@ public class ObserverDrawer : PropertyDrawer
 
             float widthProg = 0f;
 
-            if (GUI.Button(position.RatioPositionXLayout(2.5f, 1.5f, ref widthProg).SkipLine(i, 20), "-")) observer.conditions.RemoveAt(i);
+            if (GUI.Button(position.RatioPositionXLayout(6f, 1.5f, ref widthProg).SkipLine(i, 20), "-")) observer.conditions.RemoveAt(i);
 
 
             condition.color = EditorGUI.ColorField(position.RatioPositionXLayout(0.5f, 2, ref widthProg).SkipLine(i, 20), condition.color);
@@ -71,7 +87,9 @@ public class ObserverDrawer : PropertyDrawer
                     string[] compNames = new string[components.Length];
                     int compIndex = 0;
 
-                    foreach(Component comp in components)
+                    Array.Sort(compNames, StringComparer.OrdinalIgnoreCase);
+
+                    foreach (Component comp in components)
                     {
                         compNames[compIndex] = comp.GetType().Name;
                         compIndex++;
@@ -84,8 +102,8 @@ public class ObserverDrawer : PropertyDrawer
                     int methIndex = 0;
 
                     foreach (MethodInfo mi in methodInfos)
-                    {                        
-                        if(mi.ReturnType == typeof(bool))
+                    {
+                        if (mi.ReturnType == typeof(bool))
                             methodNames[methIndex] = mi.Name;
 
                         methIndex++;
@@ -93,16 +111,18 @@ public class ObserverDrawer : PropertyDrawer
 
                     methodNames = methodNames.Where(x => !string.IsNullOrEmpty(x)).ToArray();
 
+                    Array.Sort(methodNames, StringComparer.OrdinalIgnoreCase);
+
                     condition.methodIndex = EditorGUI.Popup(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.methodIndex, methodNames);
                     condition.methodName = methodNames[condition.methodIndex];
 
-                }        
+                }
             }
-            else if((ConditionType)condition.typeIndex == ConditionType.Logic)
+            else if ((ConditionType)condition.typeIndex == ConditionType.Logic)
             {
                 condition.target = EditorGUI.ObjectField(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.target, typeof(GameObject), true) as GameObject;
 
-                if(condition.target != null)
+                if (condition.target != null)
                 {
 
                     Component[] components = condition.target.GetComponents<Component>();
@@ -115,10 +135,13 @@ public class ObserverDrawer : PropertyDrawer
                         compIndex++;
                     }
 
+                    Array.Sort(compNames, StringComparer.OrdinalIgnoreCase);
+
                     condition.componentIndex = EditorGUI.Popup(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.componentIndex, compNames);
 
                     FieldInfo[] fieldInfos = components[condition.componentIndex].GetType().GetFields();
-                    string[] fieldNames = new string[fieldInfos.Length];
+                    PropertyInfo[] propertyInfos = components[condition.componentIndex].GetType().GetProperties();
+                    string[] fieldNames = new string[fieldInfos.Length + propertyInfos.Length];
                     int fieldIndex = 0;
 
                     foreach (FieldInfo fi in fieldInfos)
@@ -127,44 +150,93 @@ public class ObserverDrawer : PropertyDrawer
                         fieldIndex++;
                     }
 
+                    foreach (PropertyInfo pi in propertyInfos)
+                    {
+                        fieldNames[fieldIndex] = pi.Name + " (" + pi.PropertyType.Name + ")";
+                        fieldIndex++;
+                    }
+
+                    Array.Sort(fieldNames, StringComparer.OrdinalIgnoreCase);
+
                     condition.fieldIndex = EditorGUI.Popup(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.fieldIndex, fieldNames);
 
-                    if(fieldInfos.Length > 0 && condition.fieldIndex < fieldInfos.Length)
+
+                    if (fieldInfos.Length > 0 && condition.fieldIndex < fieldInfos.Length)
                     {
                         FieldInfo field = fieldInfos[condition.fieldIndex];
 
-                        if(field.FieldType.GetInterfaces().Contains(typeof(IComparable)))
+                        if (field.FieldType.GetInterfaces().Contains(typeof(IComparable)))
                         {
                             condition.operatorIndex = EditorGUI.Popup(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.operatorIndex, System.Enum.GetNames(typeof(Operator)));
                         }
-
-                        
-                        
-                        switch(field.FieldType.Name)
+                        else
                         {
-                            case string s when s == (typeof(bool)).Name:
-                            {
-                                    if (condition.atom.GetType().Name != typeof(UGS_Bool).Name) condition.atom = new UGS_Bool();
-
-                                    (condition.atom as UGS_Bool).value = EditorGUI.Toggle(position.RatioPositionXLayout(1, 4, ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Bool).value);
-                                    break;
-                            }
-                            case string s when s == (typeof(float)).Name:
-                            {
-                                if (condition.atom.GetType().Name != typeof(UGS_Float).Name) condition.atom = new UGS_Float();
-
-                                (condition.atom as UGS_Float).value = EditorGUI.FloatField(position.RatioPositionXLayout(1, 1 + (0.5f * (condition.atom as UGS_Float).value.ToString().Length), ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Float).value);
-                                break;
-                            }
-                            case string s when s == (typeof(int)).Name:
-                                {
-                                    if (condition.atom.GetType().Name != typeof(UGS_Int).Name) condition.atom = new UGS_Int();
-
-                                    (condition.atom as UGS_Int).value = EditorGUI.IntField(position.RatioPositionXLayout(1, 1 + (0.5f *(condition.atom as UGS_Int).value.ToString().Length), ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Int).value);
-                                    break;
-                                }
+                            condition.operatorIndex = EditorGUI.Popup(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.operatorIndex, new string[2] { Operator.EQUALS.ToString(), Operator.DIFFERENT.ToString() });
                         }
 
+                        if (!field.FieldType.IsValueType && field.FieldType.Name != "String")
+                        {
+                            condition.atom = null;
+
+                            condition.comparedObject = EditorGUI.ObjectField(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), condition.comparedObject, field.FieldType, true);
+                        }
+                        else
+                        {
+                            condition.comparedObject = null;
+
+                            switch (field.FieldType.Name)
+                            {
+                                case string s when s == (typeof(bool)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_Bool).Name) condition.atom = new UGS_Bool();
+
+                                        (condition.atom as UGS_Bool).value = EditorGUI.Toggle(position.RatioPositionXLayout(1, 4, ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Bool).value);
+                                        break;
+                                    }
+                                case string s when s == (typeof(float)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_Float).Name) condition.atom = new UGS_Float();
+
+                                        (condition.atom as UGS_Float).value = EditorGUI.FloatField(position.RatioPositionXLayout(1, 1 + (0.5f * (condition.atom as UGS_Float).value.ToString().Length), ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Float).value);
+                                        break;
+                                    }
+                                case string s when s == (typeof(int)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_Int).Name) condition.atom = new UGS_Int();
+
+                                        (condition.atom as UGS_Int).value = EditorGUI.IntField(position.RatioPositionXLayout(1, 1 + (0.5f * (condition.atom as UGS_Int).value.ToString().Length), ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Int).value);
+                                        break;
+                                    }
+                                case string s when s == (typeof(string)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_String).Name) condition.atom = new UGS_String();
+
+                                        (condition.atom as UGS_String).value = EditorGUI.TextField(position.RatioPositionXLayout(1, 4 + (0.4f * (condition.atom as UGS_String).value.ToString().Length), ref widthProg).SkipLine(i, 20), (condition.atom as UGS_String).value);
+                                        break;
+                                    }
+                                case string s when s == (typeof(Vector2)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_Vector2).Name) condition.atom = new UGS_Vector2();
+
+                                        (condition.atom as UGS_Vector2).value = EditorGUI.Vector2Field(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), "", (condition.atom as UGS_Vector2).value);
+                                        break;
+                                    }
+                                case string s when s == (typeof(Vector3)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_Vector3).Name) condition.atom = new UGS_Vector3();
+
+                                        (condition.atom as UGS_Vector3).value = EditorGUI.Vector3Field(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), "", (condition.atom as UGS_Vector3).value);
+                                        break;
+                                    }
+                                case string s when s == (typeof(Color)).Name:
+                                    {
+                                        if (condition.atom.GetType().Name != typeof(UGS_Color).Name) condition.atom = new UGS_Color();
+
+                                        (condition.atom as UGS_Color).value = EditorGUI.ColorField(position.RatioPositionXLayout(1, 10, ref widthProg).SkipLine(i, 20), (condition.atom as UGS_Color).value);
+                                        break;
+                                    }
+                            }
+                        }
                     }
 
 
@@ -205,11 +277,13 @@ public class ObserverDrawer : PropertyDrawer
 
         int higher = observer.outputs.Count >= observer.conditions.Count ? observer.outputs.Count : observer.conditions.Count;
 
-        return 20 * (1 + higher);
+        return 20 * (higher) + 10;
     }
 }
 public enum ConditionType {Logic, Method, None}
 
 public enum Operator {EQUALS, DIFFERENT, SUPERIOR, INFERIOR}
+
+public enum ObserverAction {Add, Reset}
 
 

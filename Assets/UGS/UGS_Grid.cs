@@ -35,6 +35,9 @@ public class UGS_Grid : MonoBehaviour
 
     public GridFocusPoint initialFocusPoint = GridFocusPoint.Middle;
 
+    public string str;
+    public Color col;
+
     // Start is called before the first frame update
     void Awake()
     {

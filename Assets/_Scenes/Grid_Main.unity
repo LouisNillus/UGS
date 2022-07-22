@@ -229,6 +229,8 @@ MonoBehaviour:
   mouseTracker: {fileID: 1107302044}
   cellsDimensions: {x: 1, y: 1}
   initialFocusPoint: 3
+  str: 
+  col: {r: 0, g: 0, b: 0, a: 0}
 --- !u!4 &854614577
 Transform:
   m_ObjectHideFlags: 0
@@ -666,7 +668,29 @@ MonoBehaviour:
           methodIndex: 0
           methodName: 
           fieldIndex: 0
+          comparedObject: {fileID: 0}
           operatorIndex: 0
+        - lineIndex: 1
+          typeIndex: 0
+          color: {r: 1, g: 1, b: 1, a: 1}
+          target: {fileID: 0}
+          componentIndex: 0
+          methodIndex: 0
+          methodName: 
+          fieldIndex: 0
+          comparedObject: {fileID: 0}
+          operatorIndex: 0
+        - lineIndex: 2
+          typeIndex: 0
+          color: {r: 1, g: 1, b: 1, a: 1}
+          target: {fileID: 0}
+          componentIndex: 0
+          methodIndex: 0
+          methodName: 
+          fieldIndex: 0
+          comparedObject: {fileID: 0}
+          operatorIndex: 0
+        actionIndex: 0
       output: []
   - key: 97
     reverse: 0
